@@ -1,0 +1,11 @@
+F:\dev\Projects\RolePlayingGame\RPG.Library\bin\Debug\net5.0\RPG.Library.deps.json
+F:\dev\Projects\RolePlayingGame\RPG.Library\bin\Debug\net5.0\RPG.Library.dll
+F:\dev\Projects\RolePlayingGame\RPG.Library\bin\Debug\net5.0\ref\RPG.Library.dll
+F:\dev\Projects\RolePlayingGame\RPG.Library\bin\Debug\net5.0\RPG.Library.pdb
+F:\dev\Projects\RolePlayingGame\RPG.Library\obj\Debug\net5.0\RPG.Library.GeneratedMSBuildEditorConfig.editorconfig
+F:\dev\Projects\RolePlayingGame\RPG.Library\obj\Debug\net5.0\RPG.Library.AssemblyInfoInputs.cache
+F:\dev\Projects\RolePlayingGame\RPG.Library\obj\Debug\net5.0\RPG.Library.AssemblyInfo.cs
+F:\dev\Projects\RolePlayingGame\RPG.Library\obj\Debug\net5.0\RPG.Library.csproj.CoreCompileInputs.cache
+F:\dev\Projects\RolePlayingGame\RPG.Library\obj\Debug\net5.0\RPG.Library.dll
+F:\dev\Projects\RolePlayingGame\RPG.Library\obj\Debug\net5.0\ref\RPG.Library.dll
+F:\dev\Projects\RolePlayingGame\RPG.Library\obj\Debug\net5.0\RPG.Library.pdb
