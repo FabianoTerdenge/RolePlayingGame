@@ -1,0 +1,39 @@
+## Visual Studio - Core Ignore ##
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.cache
+*.log
+*.vspscc
+*.vssscc
+
+## Build Results ##
+*.exe
+*.dll
+*.pdb
+*.obj
+*.lib
+
+## NuGet ##
+packages/
+*.nupkg
+.nuget/
+
+## Debug/Test Files ##
+*.ilk
+*.pch
+TestResults/
+[Tt]est[Rr]esult*/
+*.sass-cache/
+
+## Project Files ##
+*.csproj.user
+*.pubxml
+*.swp
+*.sln.docstates
+
+# App-specific ignores
+appsettings.*.json  # Except appsettings.json
+secrets.json
