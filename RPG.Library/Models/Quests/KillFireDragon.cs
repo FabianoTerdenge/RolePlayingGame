@@ -16,30 +16,20 @@ namespace RPG.Models.Quests
 
         public override void isCompleted(List<FightRecord> fightRecords)
         {
-        foreach (var record in fightRecords)
-        {
-            if (record.PlayerAttack)
+            foreach (FightRecord fr in fightRecords)
             {
-                bool foundFireDragonFight = false;
-
-                foreach (FightRecord item in fightRecords)
+                List<Monster> dragon = fr.Monsters.FindAll(m => m.Name.Equals("Feuer-Drache"));
+                if (dragon.Any())
                 {
-                    if (item.Monsters.FindAll(m => m.Name.Equals("Feuer-Drache")).Any())
+                    if (dragon.FindAll((d) => d.CurrentHealth <= 0).Count() > 0)
                     {
-                        foundFireDragonFight = true;
+                        IsCompleted = true;
+                        Console.WriteLine($"Quest '{Title}' abgeschlossen!");
+                        //player get some kind of reward
+                        break;
                     }
                 }
-                if (!foundFireDragonFight) { continue; }
-                //check fightId for dragon defeat
-                int questFightId = record.FightId;
-                FightRecord lastFightRecord = fightRecords.FindLast(fr => fr.FightId == questFightId);
-                if (lastFightRecord.Monsters.Count != 0) { continue; }
-                IsCompleted = true;
-                Console.WriteLine($"Quest '{Title}' abgeschlossen!");
-                //player get some kind of reward
-
             }
         }
-    }
     }
 }

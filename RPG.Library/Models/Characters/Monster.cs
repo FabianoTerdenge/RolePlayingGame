@@ -20,6 +20,8 @@ namespace RPG.Models
         {
             Console.WriteLine($"{Name} greift {player.Name} an und verursacht {Strength} Schaden!");
             player.CurrentHealth -= Strength;
+            Console.WriteLine($"{player.Name} hat noch {player.CurrentHealth} Lebenspunkte.");
+
             if (player.CurrentHealth <= 0)
             {
                 Console.WriteLine($"{player.Name} wurde besiegt!");
@@ -30,5 +32,6 @@ namespace RPG.Models
         {
             ability.Use(target);
         }
+
     }
 }

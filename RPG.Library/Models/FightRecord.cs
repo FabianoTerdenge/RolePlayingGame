@@ -10,12 +10,15 @@ namespace RPG.Models
         public bool PlayerAttack { get; set; }
         public Player Player { get; set; }
         public List<Monster> Monsters { get; set; }
-        public FightRecord(bool playerAttack,  List<Monster> monsters, Player player)
+        public FightRecord(bool playerAttack,  List<Monster> monsters, Player player,bool newFight=false)
         {
             PlayerAttack = playerAttack;
             Monsters = monsters;
             Player = player;
-            this.FightId = ++_FightId;
+            if (newFight)
+                _FightId++;
+            FightId = _FightId;
+
         }
     }
 }

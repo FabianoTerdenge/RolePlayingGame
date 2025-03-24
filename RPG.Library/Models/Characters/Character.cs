@@ -6,11 +6,16 @@ using System.Threading.Tasks;
 
 namespace RPG.Models
 {
-    public class Character
+    public abstract class Character
     {
         public string Name { get; set; }
         public int MaxHealth { get; set; }
-        public int CurrentHealth { get; set; }
+        private int _currentHealth;  
+
+        public int CurrentHealth {
+            get { return _currentHealth > 0 ? _currentHealth : 0; }  
+            set { _currentHealth = value; }
+        }
         public int Level { get; set; }
         public int Strength { get; set; }
         public int Dexterity { get; set; }
@@ -19,8 +24,10 @@ namespace RPG.Models
         public int Gold { get; set; }
         public int Mana { get; set; }
         public List<Ability> Abilities { get; set; }
+        public List<StatusEffect> StatusEffects { get; set; }
 
-        public Character(string name, int health, int level, int strength, int dexterity, int intelligence, int gold, int experience, int mana,List<Ability> abilities)
+
+        public Character(string name, int health, int level, int strength, int dexterity, int intelligence, int gold, int experience, int mana, List<Ability> abilities)
         {
             Name = name;
             MaxHealth = health;
@@ -33,7 +40,8 @@ namespace RPG.Models
             Gold = gold;
             Mana = mana;
             Abilities = abilities;
-    }
+            StatusEffects = new List<StatusEffect>();
+        }
 
         public void Attack()
         {
@@ -44,13 +52,42 @@ namespace RPG.Models
         {
             Console.WriteLine($"{Name} verteidigt sich!");
         }
-
+        public bool IsAlive()
+        {
+            return CurrentHealth > 0;
+        }
         public void UseItem(Item item)
         {
             Console.WriteLine($"{Name} benutzt {item.Name}.");
             item.Use();
         }
+        public void ProcessCooldowns()
+        {
+            foreach (var ability in Abilities)
+            {
+                ability.ReduceCooldown();
+            }
+        }
+        public void ApplyStatusEffect(StatusEffect effect)
+        {
+            StatusEffects.RemoveAll(e => e.Name == effect.Name);
 
+            StatusEffects.Add(effect);
+            Console.WriteLine($"{Name} ist jetzt {effect.Name} ausgesetzt!");
+        }
+
+        public void ProcessStatusEffects()
+        {
+            for (int i = StatusEffects.Count - 1; i >= 0; i--)
+            {
+                StatusEffects[i].Apply(this);
+                if (StatusEffects[i].Duration <= 0)
+                {
+                    Console.WriteLine($"{Name} ist nicht mehr {StatusEffects[i].Name} ausgesetzt.");
+                    StatusEffects.RemoveAt(i);
+                }
+            }
+        }
         public void LevelUp()
         {
             Level++;

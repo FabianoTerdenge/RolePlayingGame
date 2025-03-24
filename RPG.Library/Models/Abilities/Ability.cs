@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace RPG.Models
 {
@@ -8,15 +9,34 @@ namespace RPG.Models
         public int Damage { get; set; }
         public int ManaCost { get; set; }
         public int Cooldown { get; set; }
+        public int RemainingCooldown { get; set; } 
+        public StatusEffect StatusEffect { get; set; }
 
-        public Ability(string name, int damage, int manaCost, int cooldown)
+
+        public Ability(string name, int damage, int manaCost, int cooldown, StatusEffect statusEffect)
         {
             Name = name;
             Damage = damage;
             ManaCost = manaCost;
             Cooldown = cooldown;
+            RemainingCooldown = 0;
+            StatusEffect = statusEffect;
         }
 
-        public abstract void Use(Character target);
+        public virtual void Use(Character target)
+        {
+            if (StatusEffect != null)
+            {
+                target.ApplyStatusEffect(StatusEffect);
+            }
+            RemainingCooldown = Cooldown;
+        }
+        public void ReduceCooldown()//reduce cooldown and apply effects
+        {
+            if (RemainingCooldown > 0)
+            {
+                RemainingCooldown--;
+            }
+        }
     }
 }
