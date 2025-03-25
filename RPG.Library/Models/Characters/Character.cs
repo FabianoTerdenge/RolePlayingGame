@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,8 @@ namespace RPG.Models
 {
     public abstract class Character
     {
+        private int _id;
+        public int Id { get; set; }
         public string Name { get; set; }
         public int MaxHealth { get; set; }
         private int _currentHealth;  
@@ -29,6 +32,7 @@ namespace RPG.Models
 
         public Character(string name, int health, int level, int strength, int dexterity, int intelligence, int gold, int experience, int mana, List<Ability> abilities)
         {
+            Id = _id++;
             Name = name;
             MaxHealth = health;
             CurrentHealth = health;
@@ -118,6 +122,15 @@ namespace RPG.Models
                 Console.WriteLine($"{Name} hat nicht genug Mana, um {ability.Name} zu verwenden!");
             }
         }
+       
+    }
+    public class CharacterComparer : IEqualityComparer<Character>
+    {
+        public bool Equals(Character x, Character y) => x.Id == y.Id;
+
+
+        public int GetHashCode(Character obj) => obj.Id.GetHashCode();
+
     }
 
 }

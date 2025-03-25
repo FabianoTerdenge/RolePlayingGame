@@ -32,7 +32,7 @@ Monster dragon = new Monster("Feuer-Drache", 50, 1, 10, 8, 5, true, 10, 100, 10,
 game.Monsters.Add(dragon);
 
 // Spielercharakter erstellen
-Player player = new Player("Held", 100, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { fireball, heal, poisonDart,stunAttack });
+Player player = new Player("Sir Lancelot", 100, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { new FireBallAbility((FireBallAbility)fireball), heal, poisonDart,stunAttack });
 game.Players.Add(player);
 
 //Quest erstellen

@@ -13,6 +13,9 @@ namespace RPG.Models
         public FireBallAbility(string name, int damage, int manaCost, int cooldown, StatusEffect statusEffect) : base(name, damage, manaCost, cooldown, statusEffect)
         {
         }
+        public FireBallAbility(FireBallAbility clone) : base(clone.Name, clone.Damage, clone.ManaCost, clone.Cooldown, clone.StatusEffect)
+        {
+        }
         public override void Use(Character target)
         {
             if (RemainingCooldown > 0)

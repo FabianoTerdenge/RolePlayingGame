@@ -40,13 +40,11 @@ namespace RPG
             Quests.Add(quest);
             Console.WriteLine($"Quest '{quest.Title}' wurde hinzugefügt.");
         }
+        //one player fight n monsters with a round stil combat system
         public void FightMonster(Player player, List<Monster> monsters)
         {
-            if (monsters.Count == 1)
-                Console.WriteLine($" \nEin Kampf beginnt zwischen {player.Name} und {monsters[0].Name}!\n");
-            else
-                Console.WriteLine($" \nEin Kampf beginnt zwischen {player.Name} und {monsters.Count} Monstern!\n");
-            
+            AnouncmentBeforeFight(new List<Player> { player }, monsters);
+
             FightRecords.Add(new FightRecord(true, new List<Monster>(monsters), player, true));
             while (player.CurrentHealth > 0 && monsters.Find((m) => m.CurrentHealth > 0) != null)
             {
@@ -194,6 +192,177 @@ namespace RPG
             {
                 Console.WriteLine("Alle Monster wurden besiegt!");
             }
+        }
+        public void FightMonster(List<Player> players, List<Monster> monsters)
+        {
+            AnouncmentBeforeFight(players, monsters);
+            Player[] alivePlayer = players.ToArray();
+            Monster[] aliveMonsters = monsters.ToArray();
+
+            while (alivePlayer.Length > 0 && aliveMonsters.Length > 0)
+            {
+                //alle Player greifen an
+                foreach (var attackingPlayer in (List<Player>)players.Intersect(alivePlayer, new CharacterComparer())) // ToList() vermeidet Änderungen während der Iteration
+                {
+                    FightRecords.Add(new FightRecord(true, new List<Monster>(monsters), attackingPlayer, true));
+
+                    // Spieleraktionen
+                    Console.WriteLine($"\n{attackingPlayer.Name}: Was möchtest du tun?");
+                    Console.WriteLine("1. Angreifen");
+                    Console.WriteLine("2. Spezialfähigkeit verwenden\n");
+                    string attackChoice = Console.ReadLine();
+
+                    if (attackChoice == "1") // Normal Attack
+                    {
+                        // Zielmonster auswählen
+                        int monsterChoice = 0;
+                        if (aliveMonsters.Length > 1)
+                        {
+                            Console.WriteLine("Wähle ein Monster zum Angreifen:");
+                            for (int i = 0; i < aliveMonsters.Length; i++)
+                            {
+                                Console.WriteLine($"{i + 1}. {aliveMonsters[i].Name} (HP: {aliveMonsters[i].CurrentHealth})");
+                            }
+                            monsterChoice = int.Parse(Console.ReadLine()) - 1;
+                        }
+
+                        if (monsterChoice >= 0 && monsterChoice < aliveMonsters.Length)
+                        {
+                            attackingPlayer.Attack();
+                            aliveMonsters[monsterChoice].CurrentHealth -= attackingPlayer.Strength;
+                            Console.WriteLine($"{aliveMonsters[monsterChoice].Name} hat noch {aliveMonsters[monsterChoice].CurrentHealth} Lebenspunkte.");
+
+                            if (aliveMonsters[monsterChoice].CurrentHealth <= 0)
+                            {
+                                Console.WriteLine($"{aliveMonsters[monsterChoice].Name} wurde besiegt!");
+                                attackingPlayer.GainExperience(aliveMonsters[monsterChoice].ExperienceReward);
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Ungültige Auswahl!");
+                        }
+                        FightRecords.Add(new FightRecord(true, new List<Monster>(monsters), attackingPlayer));
+                    }
+                    else if (attackChoice == "2") // Ability Cast
+                    {
+                        if (attackingPlayer.Abilities.Count > 0)
+                        {
+                            Console.WriteLine("\nWähle eine Fähigkeit:");
+                            for (int i = 0; i < attackingPlayer.Abilities.Count; i++)
+                            {
+                                Console.WriteLine($"{i + 1}. {attackingPlayer.Abilities[i].Name} (Schaden: {attackingPlayer.Abilities[i].Damage}, Mana: {attackingPlayer.Abilities[i].ManaCost})");
+                            }
+                            int abilityChoice = int.Parse(Console.ReadLine()) - 1;
+
+                            if (abilityChoice >= 0 && abilityChoice < attackingPlayer.Abilities.Count)
+                            {
+                                Ability selectedAbility = attackingPlayer.Abilities[abilityChoice];
+
+                                // Bereichsangriff oder Einzelziel?
+                                if (selectedAbility.Name != "Heilung") // Beispiel für einen Bereichsangriff
+                                {
+                                    // Zeige verfügbare Monster an
+                                    int SelectedMonsterChoice = 1;
+                                    bool validInput = true;
+                                    if (aliveMonsters.Length > 1)
+                                    {
+                                        Console.WriteLine("Wähle ein Monster zum Angreifen aus:");
+                                        for (int i = 0; i < aliveMonsters.Length; i++)
+                                        {
+                                            Console.WriteLine($"{i + 1}. {aliveMonsters[i].Name} (HP: {aliveMonsters[i].CurrentHealth})");
+                                        }
+
+                                        // Spieler-Eingabe verarbeiten
+                                        validInput = int.TryParse(Console.ReadLine(), out SelectedMonsterChoice);
+                                    }
+
+                                    if (validInput && SelectedMonsterChoice > 0 && SelectedMonsterChoice <= aliveMonsters.Length)
+                                    {
+                                        Monster target = aliveMonsters[SelectedMonsterChoice - 1];
+                                        attackingPlayer.UseAbility(selectedAbility, target);
+
+                                        if (!target.IsAlive())
+                                        {
+                                            Console.WriteLine($"{target.Name} wurde besiegt!");
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Ungültige Eingabe!");
+                                    }
+
+                                }
+                                else // Heal
+                                {
+                                    attackingPlayer.UseAbility(selectedAbility, attackingPlayer);
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("Ungültige Auswahl!");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Du hast keine Fähigkeiten!");
+                        }
+                        FightRecords.Add(new FightRecord(true, new List<Monster>(monsters), attackingPlayer));
+                    }
+                }
+                aliveMonsters = monsters.Where((p) => p.CurrentHealth > 0).ToArray();
+
+                // Monsteraktionen
+                foreach (var monster in (List<Monster>)monsters.Intersect(aliveMonsters, new CharacterComparer()))  // ToList() vermeidet Änderungen während der Iteration
+                {
+                    alivePlayer = players.Where((p) => p.CurrentHealth > 0).ToArray();
+                    Player playerTarget = alivePlayer[new Random().Next(0, alivePlayer.Length)];
+                    //Ability Attack
+                    if (monster.Abilities.Count > 0 && new Random().Next(0, 2) == 1) // 50% Chance, eine Fähigkeit zu verwenden
+                    {
+                        Ability monsterAbility = monster.Abilities[new Random().Next(0, monster.Abilities.Count)];
+                        //attackChoice
+                        monster.UseAbility(monsterAbility, alivePlayer[new Random().Next(0, alivePlayer.Length)]);
+                    }
+                    else //normal Attack
+                    {
+                        monster.AttackPlayer(alivePlayer[new Random().Next(0, alivePlayer.Length)]);
+                    }
+
+                    if (playerTarget.CurrentHealth <= 0)
+                    {
+                        Console.WriteLine($"\n{playerTarget.Name} wurde besiegt!\n");
+                        return; // Kampf beenden
+                    }
+                    FightRecords.Add(new FightRecord(false, new List<Monster>(monsters), playerTarget));
+                }
+                alivePlayer = players.Where((p) => p.CurrentHealth > 0).ToArray();
+
+                EndOfRound();
+
+            }
+            //check for Quest Completion
+            Quests.ForEach(q => q.isCompleted(FightRecords));
+            if (monsters.Find((m) => m.CurrentHealth > 0) == null)
+            {
+                Console.WriteLine("Alle Monster wurden besiegt!");
+            }
+        }
+
+        private void AnouncmentBeforeFight(List<Player> players, List<Monster> monsters)
+        {
+            Console.WriteLine($" \nEin Kampf beginnt zwischen ");
+            Console.WriteLine("| {0,-20} | {1,-20} |", "Helden", "Monster");
+            Console.WriteLine("| -------------------- | -------------------- |");
+
+            int rowCount = 0;
+            while (Math.Max(players.Count, monsters.Count) > rowCount)
+            {
+                Console.WriteLine("| {0,-20} | {1,-20} |", players[rowCount].Name, monsters[rowCount].Name);
+
+                rowCount++;
+            }
+
         }
 
         private void EndOfRound()
