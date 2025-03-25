@@ -23,17 +23,19 @@ StatusEffect stunEffect = new StatusEffect("Betäubung", 2, target =>
     Console.WriteLine($"{target.Name} ist betäubt und kann nicht angreifen!");
 });
 //Abilities
-Ability fireball = new FireBallAbility("Feuerball", 20, 30, 3, null);
-Ability heal = new HealAbility("Heilung", -15, 20, 5, null); 
-Ability poisonDart = new PoisonAbility("Giftpfeil", 10, 20, 2, poisonEffect);
-Ability stunAttack = new StunAbility("Betäubungsschlag", 5, 0, 3, stunEffect);
+FireBallAbility fireball = new FireBallAbility("Feuerball", 20, 30, 3, null);
+HealAbility heal = new HealAbility("Heilung", -15, 20, 5, null);
+PoisonAbility poisonDart = new PoisonAbility("Giftpfeil", 10, 20, 2, poisonEffect);
+StunAbility stunAttack = new StunAbility("Betäubungsschlag", 5, 0, 3, stunEffect);
 // Monster erstellen
 Monster dragon = new Monster("Feuer-Drache", 50, 1, 10, 8, 5, true, 10, 100, 10, new List<Ability> { fireball });
 game.Monsters.Add(dragon);
 
 // Spielercharakter erstellen
-Player player = new Player("Sir Lancelot", 100, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { new FireBallAbility((FireBallAbility)fireball), heal, poisonDart,stunAttack });
-game.Players.Add(player);
+Player player1 = new Player("Sir Lancelot", 100, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { new FireBallAbility(fireball), heal, poisonDart,stunAttack });
+Player player2 = new Player("Lady Gwinevier", 100, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { new FireBallAbility(fireball), new HealAbility(heal), new PoisonAbility(poisonDart),new StunAbility(stunAttack) });
+game.Players.Add(player1);
+game.Players.Add(player2);
 
 //Quest erstellen
 Quest quest = new KillFireDragon("Feuer-Drachen besiegen", "Besiege den Feuer-Drachen im Wald.", new List<Monster> { dragon }, 100);
@@ -49,7 +51,7 @@ inventory.AddItem(potion);
 inventory.DisplayItems();
 
 // Spieleraktionen
-game.FightMonster(player, game.Monsters);
+game.FightMonster(game.Players, game.Monsters);
 
 // Spiel beenden
 game.EndGame();

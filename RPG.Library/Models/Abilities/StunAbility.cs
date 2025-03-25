@@ -1,9 +1,14 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using RPG.Models;
 using System;
+using static System.Net.Mime.MediaTypeNames;
 
 public class StunAbility : Ability
 {
+    public StunAbility(StunAbility clone) : base(clone.Name, clone.Damage, clone.ManaCost, clone.Cooldown, clone.StatusEffect)
+    {
+    }
+
     public StunAbility(string name, int damage, int manaCost, int cooldown, StatusEffect statusEffect) : base( name, damage, manaCost, cooldown, statusEffect)
     {
     }

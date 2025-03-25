@@ -4,6 +4,10 @@ namespace RPG.Models
 {
     public class HealAbility : Ability
     {
+        public HealAbility(HealAbility clone):base(clone.Name,clone.Damage, clone.ManaCost,clone.Cooldown,clone.StatusEffect)
+        {
+        }
+
         public HealAbility(string name, int damage, int manaCost, int cooldown, StatusEffect statusEffect) : base(name, damage, manaCost, cooldown, statusEffect)
         {
         }

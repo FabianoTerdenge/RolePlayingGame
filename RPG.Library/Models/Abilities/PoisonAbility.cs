@@ -1,9 +1,14 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using RPG.Models;
 using System;
+using static System.Net.Mime.MediaTypeNames;
 
 public class PoisonAbility : Ability
 {
+    public PoisonAbility(PoisonAbility clone) : base(clone.Name, clone.Damage, clone.ManaCost, clone.Cooldown, clone.StatusEffect)
+    {
+    }
+
     public PoisonAbility(string name, int damage, int manaCost, int cooldown, StatusEffect statusEffect) : base(name, damage, manaCost, cooldown, statusEffect)
     {
     }

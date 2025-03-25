@@ -202,8 +202,12 @@ namespace RPG
             while (alivePlayer.Length > 0 && aliveMonsters.Length > 0)
             {
                 //alle Player greifen an
-                foreach (var attackingPlayer in (List<Player>)players.Intersect(alivePlayer, new CharacterComparer())) // ToList() vermeidet Änderungen während der Iteration
+                foreach (var attackingPlayer in alivePlayer)
                 {
+                    aliveMonsters = monsters.Where((p) => p.CurrentHealth > 0).ToArray();
+
+                    if (!aliveMonsters.Any())
+                        continue;
                     FightRecords.Add(new FightRecord(true, new List<Monster>(monsters), attackingPlayer, true));
 
                     // Spieleraktionen
@@ -313,10 +317,11 @@ namespace RPG
                 aliveMonsters = monsters.Where((p) => p.CurrentHealth > 0).ToArray();
 
                 // Monsteraktionen
-                foreach (var monster in (List<Monster>)monsters.Intersect(aliveMonsters, new CharacterComparer()))  // ToList() vermeidet Änderungen während der Iteration
+                foreach (var monster in aliveMonsters)
                 {
-                    alivePlayer = players.Where((p) => p.CurrentHealth > 0).ToArray();
                     Player playerTarget = alivePlayer[new Random().Next(0, alivePlayer.Length)];
+                    if (!alivePlayer.Any())
+                        continue;
                     //Ability Attack
                     if (monster.Abilities.Count > 0 && new Random().Next(0, 2) == 1) // 50% Chance, eine Fähigkeit zu verwenden
                     {
@@ -335,8 +340,9 @@ namespace RPG
                         return; // Kampf beenden
                     }
                     FightRecords.Add(new FightRecord(false, new List<Monster>(monsters), playerTarget));
+                    alivePlayer = players.Where((p) => p.CurrentHealth > 0).ToArray();
+
                 }
-                alivePlayer = players.Where((p) => p.CurrentHealth > 0).ToArray();
 
                 EndOfRound();
 
@@ -358,7 +364,7 @@ namespace RPG
             int rowCount = 0;
             while (Math.Max(players.Count, monsters.Count) > rowCount)
             {
-                Console.WriteLine("| {0,-20} | {1,-20} |", players[rowCount].Name, monsters[rowCount].Name);
+                Console.WriteLine("| {0,-20} | {1,-20} |", players.Count>rowCount?players[rowCount].Name:"", monsters.Count>rowCount?monsters[rowCount].Name:"");
 
                 rowCount++;
             }
