@@ -9,7 +9,7 @@ public class StunAbility : Ability
     {
     }
 
-    public StunAbility(string name, int damage, int manaCost, int cooldown, StatusEffect statusEffect) : base( name, damage, manaCost, cooldown, statusEffect)
+    public StunAbility(string name, int damage, int manaCost, float cooldown, StatusEffect statusEffect) : base( name, damage, manaCost, cooldown, statusEffect)
     {
     }
 

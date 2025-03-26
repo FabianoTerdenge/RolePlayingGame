@@ -1,7 +1,9 @@
-﻿using RPG.Models;
+﻿using RPG.Library.Models;
+using RPG.Models;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -9,20 +11,18 @@ using System.Threading.Tasks;
 
 namespace RPG
 {
-
     public class Game
     {
         public List<Player> Players { get; set; }
         public List<Quest> Quests { get; set; }
         public List<Monster> Monsters { get; set; }
-        public List<FightRecord> FightRecords { get; set; }
+        private static float _deltaTime = 0.1f;
 
         public Game()
         {
             Players = new List<Player>();
             Quests = new List<Quest>();
             Monsters = new List<Monster>();
-            FightRecords = new List<FightRecord>();
         }
 
         public void StartGame()
@@ -45,7 +45,7 @@ namespace RPG
         {
             AnouncmentBeforeFight(new List<Player> { player }, monsters);
 
-            FightRecords.Add(new FightRecord(true, new List<Monster>(monsters), player, true));
+            FightLog.records.Add(new FightRecord(true, new List<Player>{ player }, new List<Monster>( monsters), player, true));
             while (player.CurrentHealth > 0 && monsters.Find((m) => m.CurrentHealth > 0) != null)
             {
                 // Spieleraktionen
@@ -70,11 +70,11 @@ namespace RPG
 
                     if (monsterChoice >= 0 && monsterChoice < monsters.Count)
                     {
-                        player.Attack();
+                        Console.WriteLine($"{player.Name} greift {monsters[monsterChoice].Name} an");
                         monsters[monsterChoice].CurrentHealth -= player.Strength;
                         Console.WriteLine($"{monsters[monsterChoice].Name} hat noch {monsters[monsterChoice].CurrentHealth} Lebenspunkte.");
 
-                        if (monsters[monsterChoice].CurrentHealth <= 0)
+                        if (!monsters[monsterChoice].IsAlive())
                         {
                             Console.WriteLine($"{monsters[monsterChoice].Name} wurde besiegt!");
                             player.GainExperience(monsters[monsterChoice].ExperienceReward);
@@ -84,7 +84,7 @@ namespace RPG
                     {
                         Console.WriteLine("Ungültige Auswahl!");
                     }
-                    FightRecords.Add(new FightRecord(true, new List<Monster>(monsters), player));
+                    FightLog.records.Add(new FightRecord(true,new List<Player> { player },new List<Monster>(monsters ), player));
                 }
                 else if (attackChoice == "2") // Ability Cast
                 {
@@ -109,7 +109,7 @@ namespace RPG
                                 foreach (var monster in monsters)
                                 {
                                     player.UseAbility(ability, monster);
-                                    if (monster.CurrentHealth <= 0)
+                                    if (!monster.IsAlive())
                                     {
                                         Console.WriteLine($"{monster.Name} wurde besiegt!");
                                         player.GainExperience(monster.ExperienceReward);
@@ -160,7 +160,7 @@ namespace RPG
                     {
                         Console.WriteLine("Du hast keine Fähigkeiten!");
                     }
-                    FightRecords.Add(new FightRecord(true, new List<Monster>(monsters), player));
+                    FightLog.records.Add(new FightRecord(true, new List<Player> { player }, new List<Monster>(monsters), player));
                 }
 
                 // Monsteraktionen
@@ -173,21 +173,21 @@ namespace RPG
                     }
                     else
                     {
-                        monster.AttackPlayer(player);
+                        ((Character)monster).AutoAttackEnemy(player);
                     }
 
-                    if (player.CurrentHealth <= 0)
+                    if (!player.IsAlive())
                     {
                         Console.WriteLine($"\n{player.Name} wurde besiegt!\n");
                         return; // Kampf beenden
                     }
-                    FightRecords.Add(new FightRecord(false, new List<Monster>(monsters), player));
+                    FightLog.records.Add(new FightRecord(false, new List<Player> { player },new List<Monster> ( monsters ), player));
                 }
                 EndOfRound();
 
             }
             //check for Quest Completion
-            Quests.ForEach(q => q.isCompleted(FightRecords));
+            Quests.ForEach(q => q.isCompleted());
             if (monsters.Find((m) => m.CurrentHealth > 0) == null)
             {
                 Console.WriteLine("Alle Monster wurden besiegt!");
@@ -204,11 +204,11 @@ namespace RPG
                 //alle Player greifen an
                 foreach (var attackingPlayer in alivePlayer)
                 {
-                    aliveMonsters = monsters.Where((p) => p.CurrentHealth > 0).ToArray();
+                    aliveMonsters = monsters.Where((p) => p.IsAlive()).ToArray();
 
                     if (!aliveMonsters.Any())
                         continue;
-                    FightRecords.Add(new FightRecord(true, new List<Monster>(monsters), attackingPlayer, true));
+                    FightLog.records.Add(new FightRecord(true, new List<Player>(players),new List<Monster>(monsters), attackingPlayer, true));
 
                     // Spieleraktionen
                     Console.WriteLine($"\n{attackingPlayer.Name}: Was möchtest du tun?");
@@ -232,11 +232,11 @@ namespace RPG
 
                         if (monsterChoice >= 0 && monsterChoice < aliveMonsters.Length)
                         {
-                            attackingPlayer.Attack();
+                            Console.WriteLine($"{attackingPlayer.Name} greift {monsters[monsterChoice].Name} an");
                             aliveMonsters[monsterChoice].CurrentHealth -= attackingPlayer.Strength;
                             Console.WriteLine($"{aliveMonsters[monsterChoice].Name} hat noch {aliveMonsters[monsterChoice].CurrentHealth} Lebenspunkte.");
 
-                            if (aliveMonsters[monsterChoice].CurrentHealth <= 0)
+                            if (!aliveMonsters[monsterChoice].IsAlive())
                             {
                                 Console.WriteLine($"{aliveMonsters[monsterChoice].Name} wurde besiegt!");
                                 attackingPlayer.GainExperience(aliveMonsters[monsterChoice].ExperienceReward);
@@ -246,7 +246,7 @@ namespace RPG
                         {
                             Console.WriteLine("Ungültige Auswahl!");
                         }
-                        FightRecords.Add(new FightRecord(true, new List<Monster>(monsters), attackingPlayer));
+                        FightLog.records.Add(new FightRecord(true, new List<Player>(players), new List<Monster>(monsters), attackingPlayer));
                     }
                     else if (attackChoice == "2") // Ability Cast
                     {
@@ -311,7 +311,7 @@ namespace RPG
                         {
                             Console.WriteLine("Du hast keine Fähigkeiten!");
                         }
-                        FightRecords.Add(new FightRecord(true, new List<Monster>(monsters), attackingPlayer));
+                        FightLog.records.Add(new FightRecord(true, new List<Player>(players), new List<Monster>(monsters), attackingPlayer));
                     }
                 }
                 aliveMonsters = monsters.Where((p) => p.CurrentHealth > 0).ToArray();
@@ -327,19 +327,19 @@ namespace RPG
                     {
                         Ability monsterAbility = monster.Abilities[new Random().Next(0, monster.Abilities.Count)];
                         //attackChoice
-                        monster.UseAbility(monsterAbility, alivePlayer[new Random().Next(0, alivePlayer.Length)]);
+                        monster.UseAbility(monsterAbility, playerTarget);
                     }
                     else //normal Attack
                     {
-                        monster.AttackPlayer(alivePlayer[new Random().Next(0, alivePlayer.Length)]);
+                        ((Character)monster).AutoAttackEnemy(playerTarget);
                     }
 
-                    if (playerTarget.CurrentHealth <= 0)
+                    if (!playerTarget.IsAlive())
                     {
                         Console.WriteLine($"\n{playerTarget.Name} wurde besiegt!\n");
                         return; // Kampf beenden
                     }
-                    FightRecords.Add(new FightRecord(false, new List<Monster>(monsters), playerTarget));
+                    FightLog.records.Add(new FightRecord(false, new List<Player>(players), new List<Monster>(monsters), playerTarget));
                     alivePlayer = players.Where((p) => p.CurrentHealth > 0).ToArray();
 
                 }
@@ -348,11 +348,31 @@ namespace RPG
 
             }
             //check for Quest Completion
-            Quests.ForEach(q => q.isCompleted(FightRecords));
+            Quests.ForEach(q => q.isCompleted());
             if (monsters.Find((m) => m.CurrentHealth > 0) == null)
             {
                 Console.WriteLine("Alle Monster wurden besiegt!");
             }
+        }
+        //characters attack is related to their attackspeed
+        public void FightMonster(List<Character> characters)
+        {
+            AnouncmentBeforeFight(characters);
+            Player[] alivePlayer = characters.OfType<Player>().ToArray();
+            Monster[] aliveMonsters = characters.OfType<Monster>().ToArray();
+            while (!Character.EndOfFight(characters))
+            {
+                characters.ForEach((c) => c.UpdateAttackTiming(_deltaTime, characters));
+                EndOfRound();
+
+                //check for Quest Completion
+                Quests.ForEach(q => q.isCompleted());
+                if (!aliveMonsters.ToList().FindAll((m) => m.IsAlive()).Any())
+                {
+                    Console.WriteLine("Alle Monster wurden besiegt!");
+                }
+            }
+
         }
 
         private void AnouncmentBeforeFight(List<Player> players, List<Monster> monsters)
@@ -364,24 +384,39 @@ namespace RPG
             int rowCount = 0;
             while (Math.Max(players.Count, monsters.Count) > rowCount)
             {
-                Console.WriteLine("| {0,-20} | {1,-20} |", players.Count>rowCount?players[rowCount].Name:"", monsters.Count>rowCount?monsters[rowCount].Name:"");
+                Console.WriteLine("| {0,-20} | {1,-20} |", players.Count > rowCount ? players[rowCount].Name : "", monsters.Count > rowCount ? monsters[rowCount].Name : "");
 
                 rowCount++;
             }
 
         }
+        private void AnouncmentBeforeFight(List<Character> characters)
+        {
+            Console.WriteLine($" \nEin Kampf beginnt zwischen ");
+            Console.WriteLine("| {0,-20} | {1,-20} |", "Helden", "Monster");
+            Console.WriteLine("| -------------------- | -------------------- |");
+            List<Player> players = characters.OfType<Player>().ToList();
+            List<Monster> monsters = characters.OfType<Monster>().ToList();
+            int rowCount = 0;
+            while (Math.Max(players.Count, monsters.Count) > rowCount)
+            {
+                Console.WriteLine("| {0,-20} | {1,-20} |", players.Count > rowCount ? players[rowCount].Name : "", monsters.Count > rowCount ? monsters[rowCount].Name : "");
 
+                rowCount++;
+            }
+
+        }
         private void EndOfRound()
         {
             Players.ForEach(p =>
             {
-                p.ProcessCooldowns();
-                p.ProcessStatusEffects();
+                p.ProcessCooldowns(_deltaTime);
+                p.ProcessStatusEffects(_deltaTime);
             });
             Monsters.ForEach(m =>
             {
-                m.ProcessCooldowns();
-                m.ProcessStatusEffects();
+                m.ProcessCooldowns(_deltaTime);
+                m.ProcessStatusEffects(_deltaTime);
             });
         }
     }

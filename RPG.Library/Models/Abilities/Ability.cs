@@ -8,12 +8,12 @@ namespace RPG.Models
         public string Name { get; set; }
         public int Damage { get; set; }
         public int ManaCost { get; set; }
-        public int Cooldown { get; set; }
-        public int RemainingCooldown { get; set; } 
+        public float Cooldown { get; set; } //in s
+        public float RemainingCooldown { get; set; }  //in s
         public StatusEffect StatusEffect { get; set; }
 
 
-        public Ability(string name, int damage, int manaCost, int cooldown, StatusEffect statusEffect)
+        public Ability(string name, int damage, int manaCost, float cooldown, StatusEffect statusEffect)
         {
             Name = name;
             Damage = damage;
@@ -31,11 +31,11 @@ namespace RPG.Models
             }
             RemainingCooldown = Cooldown;
         }
-        public void ReduceCooldown()//reduce cooldown and apply effects
+        public void ReduceCooldown(float deltatime)//reduce cooldown and apply effects
         {
             if (RemainingCooldown > 0)
             {
-                RemainingCooldown--;
+                RemainingCooldown-= deltatime;
             }
         }
     }

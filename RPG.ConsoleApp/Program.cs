@@ -5,35 +5,36 @@ using RPG;
 using RPG.Models;
 using RPG.Models.Quests;
 using System.Collections.Generic;
+using System.Linq;
 
 
 // Spiel initialisieren
 Game game = new Game();
 game.StartGame();
 //StatusEffect
-StatusEffect poisonEffect = new StatusEffect("Vergiftung", 3, (target) =>
+StatusEffect poisonEffect = new StatusEffect("Vergiftung", 3f, (target) =>
 {
     Console.WriteLine($"{target.Name} erleidet Vergiftungsschaden!");
     target.CurrentHealth -= 5;
     Console.WriteLine($"{target.Name} hat noch {target.CurrentHealth} Lebenspunkte.");
 
 });
-StatusEffect stunEffect = new StatusEffect("Betäubung", 2, target =>
+StatusEffect stunEffect = new StatusEffect("Betäubung", 2f, target =>
 {
     Console.WriteLine($"{target.Name} ist betäubt und kann nicht angreifen!");
 });
 //Abilities
-FireBallAbility fireball = new FireBallAbility("Feuerball", 20, 30, 3, null);
-HealAbility heal = new HealAbility("Heilung", -15, 20, 5, null);
-PoisonAbility poisonDart = new PoisonAbility("Giftpfeil", 10, 20, 2, poisonEffect);
-StunAbility stunAttack = new StunAbility("Betäubungsschlag", 5, 0, 3, stunEffect);
+FireBallAbility fireball = new ("Feuerball", 20, 30, 3f, null);
+HealAbility heal = new ("Heilung", -15, 20, 5f, null);
+PoisonAbility poisonDart = new ("Giftpfeil", 10, 20, 2f, poisonEffect);
+StunAbility stunAttack = new ("Betäubungsschlag", 5, 0, 3f, stunEffect);
 // Monster erstellen
-Monster dragon = new Monster("Feuer-Drache", 50, 1, 10, 8, 5, true, 10, 100, 10, new List<Ability> { fireball });
+Monster dragon = new ("Feuer-Drache", 50, 1.51f, 1, 10, 8, 5, true, 10, 100, 10, new List<Ability> { fireball });
 game.Monsters.Add(dragon);
 
 // Spielercharakter erstellen
-Player player1 = new Player("Sir Lancelot", 100, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { new FireBallAbility(fireball), heal, poisonDart,stunAttack });
-Player player2 = new Player("Lady Gwinevier", 100, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { new FireBallAbility(fireball), new HealAbility(heal), new PoisonAbility(poisonDart),new StunAbility(stunAttack) });
+Player player1 = new ("Sir Lancelot", 100, 2,1, 10, 8, 5, 10, 1, 100, new List<Ability> { new FireBallAbility(fireball), heal, poisonDart,stunAttack });
+Player player2 = new ("Lady Gwinevier", 100, 2,1, 10, 8, 5, 10, 1, 100, new List<Ability> { new FireBallAbility(fireball), new HealAbility(heal), new PoisonAbility(poisonDart),new StunAbility(stunAttack) });
 game.Players.Add(player1);
 game.Players.Add(player2);
 
@@ -51,7 +52,8 @@ inventory.AddItem(potion);
 inventory.DisplayItems();
 
 // Spieleraktionen
-game.FightMonster(game.Players, game.Monsters);
-
+var combined = new List<Character>(game.Players);
+combined.AddRange(game.Monsters);
+game.FightMonster(combined);
 // Spiel beenden
 game.EndGame();

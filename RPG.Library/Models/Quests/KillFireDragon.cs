@@ -1,4 +1,5 @@
-﻿using RPG.Models;
+﻿using RPG.Library.Models;
+using RPG.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +15,11 @@ namespace RPG.Models.Quests
 
         }
 
-        public override void isCompleted(List<FightRecord> fightRecords)
+        public override void isCompleted()
         {
-            foreach (FightRecord fr in fightRecords)
+            foreach (FightRecord fr in FightLog.records)
             {
-                List<Monster> dragon = fr.Monsters.FindAll(m => m.Name.Equals("Feuer-Drache"));
+                List<Character> dragon = fr.AllCharacters.FindAll(m => m.Name.Equals("Feuer-Drache"));
                 if (dragon.Any())
                 {
                     if (dragon.FindAll((d) => d.CurrentHealth <= 0).Count() > 0)

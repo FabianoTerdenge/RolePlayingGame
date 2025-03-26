@@ -24,6 +24,6 @@ namespace RPG.Models
             IsCompleted = false;
         }
 
-        public abstract void isCompleted(List<FightRecord> fightRecords);
+        public abstract void isCompleted();
     }
 }

@@ -10,8 +10,8 @@ namespace RPG.Models
     public class Player : Character
     {
 
-        public Player(string name, int health, int level, int strength, int dexterity, int intelligence, int gold, int experience, int mana, List<Ability> abilities)
-            : base(name, health, level, strength, dexterity, intelligence,gold, experience,  mana, abilities)
+        public Player(string name, int health, float attackSpeed, int level, int strength, int dexterity, int intelligence, int gold, int experience, int mana, List<Ability> abilities)
+            : base(name, health, attackSpeed, level, strength, dexterity, intelligence,gold, experience,  mana, abilities)
         {
         }
 

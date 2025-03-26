@@ -11,8 +11,8 @@ namespace RPG.Models
     {
         public bool IsHostile { get; set; }
 
-        public NonPlayerCharacter(string name, int health, int level, int strength, int dexterity, int intelligence, bool isHostile, int gold, int experience, int mana, List<Ability> abilities)
-            : base(name, health, level, strength, dexterity, intelligence, gold, experience, mana, abilities)
+        public NonPlayerCharacter(string name, int health, float attackSpeed, int level, int strength, int dexterity, int intelligence, bool isHostile, int gold, int experience, int mana, List<Ability> abilities)
+            : base(name, health, attackSpeed, level, strength, dexterity, intelligence, gold, experience, mana, abilities)
         {
             IsHostile = isHostile;
         }

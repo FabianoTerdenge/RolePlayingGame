@@ -8,7 +8,7 @@ namespace RPG.Models
         {
         }
 
-        public HealAbility(string name, int damage, int manaCost, int cooldown, StatusEffect statusEffect) : base(name, damage, manaCost, cooldown, statusEffect)
+        public HealAbility(string name, int damage, int manaCost, float cooldown, StatusEffect statusEffect) : base(name, damage, manaCost, cooldown, statusEffect)
         {
         }
         public override void Use(Character target)
