@@ -196,6 +196,7 @@ namespace RPG.Models
             Player playerTarget = alivePlayers[new Random().Next(0, alivePlayers.Count)];
             if (!alivePlayers.Any())
                 return;
+
             //Ability Attack
             if (Abilities.Count > 0 && new Random().Next(0, 2) == 1) // 50% Chance, eine Fähigkeit zu verwenden
             {
@@ -217,8 +218,14 @@ namespace RPG.Models
             List<Monster> monsters = characters.OfType<Monster>().ToList();
             List<Player> players = characters.OfType<Player>().ToList();
 
-            if (CurrentHealth <= 0)
+            if (!IsAlive())
                 return;
+            //get called like 10 times after stun happens and after other player attacks 
+            if (StatusEffects.FindAll((se) => se.Name.Equals("Betäubung")).Any())
+            {
+                Console.WriteLine($"{Name} ist immer noch betäubt und kann nicht angreifen");
+                return;
+            }
             if (this is Player)
             {
                 if (!monsters.FindAll(m => m.CurrentHealth > 0).Any())
@@ -254,7 +261,7 @@ namespace RPG.Models
             Console.WriteLine($"{Name} benutzt {item.Name}.");
             item.Use();
         }
-        public void ProcessCooldowns(float deltatime)
+        public void ProcessAbilityCooldowns(float deltatime)
         {
             foreach (var ability in Abilities)
             {

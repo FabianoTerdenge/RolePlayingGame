@@ -16,7 +16,7 @@ namespace RPG
         public List<Player> Players { get; set; }
         public List<Quest> Quests { get; set; }
         public List<Monster> Monsters { get; set; }
-        private static float _deltaTime = 0.1f;
+        private static readonly float _deltaTime = 0.1f;
 
         public Game()
         {
@@ -45,8 +45,8 @@ namespace RPG
         {
             AnouncmentBeforeFight(new List<Player> { player }, monsters);
 
-            FightLog.records.Add(new FightRecord(true, new List<Player>{ player }, new List<Monster>( monsters), player, true));
-            while (player.CurrentHealth > 0 && monsters.Find((m) => m.CurrentHealth > 0) != null)
+            FightLog.records.Add(new FightRecord(true, new List<Player> { player }, new List<Monster>(monsters), player, true));
+            while (player.CurrentHealth > 0 && monsters.Find((m) => m.IsAlive()) != null)
             {
                 // Spieleraktionen
                 Console.WriteLine($"\n{player.Name}: Was möchtest du tun?");
@@ -84,7 +84,7 @@ namespace RPG
                     {
                         Console.WriteLine("Ungültige Auswahl!");
                     }
-                    FightLog.records.Add(new FightRecord(true,new List<Player> { player },new List<Monster>(monsters ), player));
+                    FightLog.records.Add(new FightRecord(true, new List<Player> { player }, new List<Monster>(monsters), player));
                 }
                 else if (attackChoice == "2") // Ability Cast
                 {
@@ -181,7 +181,7 @@ namespace RPG
                         Console.WriteLine($"\n{player.Name} wurde besiegt!\n");
                         return; // Kampf beenden
                     }
-                    FightLog.records.Add(new FightRecord(false, new List<Player> { player },new List<Monster> ( monsters ), player));
+                    FightLog.records.Add(new FightRecord(false, new List<Player> { player }, new List<Monster>(monsters), player));
                 }
                 EndOfRound();
 
@@ -208,7 +208,7 @@ namespace RPG
 
                     if (!aliveMonsters.Any())
                         continue;
-                    FightLog.records.Add(new FightRecord(true, new List<Player>(players),new List<Monster>(monsters), attackingPlayer, true));
+                    FightLog.records.Add(new FightRecord(true, new List<Player>(players), new List<Monster>(monsters), attackingPlayer, true));
 
                     // Spieleraktionen
                     Console.WriteLine($"\n{attackingPlayer.Name}: Was möchtest du tun?");
@@ -410,12 +410,12 @@ namespace RPG
         {
             Players.ForEach(p =>
             {
-                p.ProcessCooldowns(_deltaTime);
+                p.ProcessAbilityCooldowns(_deltaTime);
                 p.ProcessStatusEffects(_deltaTime);
             });
             Monsters.ForEach(m =>
             {
-                m.ProcessCooldowns(_deltaTime);
+                m.ProcessAbilityCooldowns(_deltaTime);
                 m.ProcessStatusEffects(_deltaTime);
             });
         }

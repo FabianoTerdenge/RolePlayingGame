@@ -35,7 +35,7 @@ namespace RPG.Models
         {
             if (RemainingCooldown > 0)
             {
-                RemainingCooldown-= deltatime;
+                RemainingCooldown = Math.Max(RemainingCooldown-deltatime,0);
             }
         }
     }

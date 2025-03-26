@@ -12,14 +12,14 @@ using System.Linq;
 Game game = new Game();
 game.StartGame();
 //StatusEffect
-StatusEffect poisonEffect = new StatusEffect("Vergiftung", 3f, (target) =>
+StatusEffect poisonEffect = new StatusEffect("Vergiftung", 3f,1f, (target) =>
 {
     Console.WriteLine($"{target.Name} erleidet Vergiftungsschaden!");
     target.CurrentHealth -= 5;
     Console.WriteLine($"{target.Name} hat noch {target.CurrentHealth} Lebenspunkte.");
 
 });
-StatusEffect stunEffect = new StatusEffect("Betäubung", 2f, target =>
+StatusEffect stunEffect = new StatusEffect("Betäubung", 2f, 1f, target =>
 {
     Console.WriteLine($"{target.Name} ist betäubt und kann nicht angreifen!");
 });
@@ -27,9 +27,9 @@ StatusEffect stunEffect = new StatusEffect("Betäubung", 2f, target =>
 FireBallAbility fireball = new ("Feuerball", 20, 30, 3f, null);
 HealAbility heal = new ("Heilung", -15, 20, 5f, null);
 PoisonAbility poisonDart = new ("Giftpfeil", 10, 20, 2f, poisonEffect);
-StunAbility stunAttack = new ("Betäubungsschlag", 5, 0, 3f, stunEffect);
+StunAbility stunAttack = new ("Betäubungsschlag", 5, 0, 1f, stunEffect);
 // Monster erstellen
-Monster dragon = new ("Feuer-Drache", 50, 1.51f, 1, 10, 8, 5, true, 10, 100, 10, new List<Ability> { fireball });
+Monster dragon = new ("Feuer-Drache", 50, 1.51f, 1, 10, 8, 5, true, 10, 100, 100, new List<Ability> { fireball });
 game.Monsters.Add(dragon);
 
 // Spielercharakter erstellen
