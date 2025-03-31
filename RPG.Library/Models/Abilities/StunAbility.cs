@@ -5,11 +5,11 @@ using static System.Net.Mime.MediaTypeNames;
 
 public class StunAbility : Ability
 {
-    public StunAbility(StunAbility clone) : base(clone.Name, clone.Damage, clone.ManaCost, clone.Cooldown, clone.StatusEffect)
+    public StunAbility(StunAbility clone) : base(clone.Name, clone.Damage,clone.Range, clone.ManaCost, clone.Cooldown, clone.StatusEffect)
     {
     }
 
-    public StunAbility(string name, int damage, int manaCost, float cooldown, StatusEffect statusEffect) : base( name, damage, manaCost, cooldown, statusEffect)
+    public StunAbility(string name, int damage, float range, int manaCost, float cooldown, StatusEffect statusEffect) : base( name, damage, range, manaCost, cooldown, statusEffect)
     {
     }
 

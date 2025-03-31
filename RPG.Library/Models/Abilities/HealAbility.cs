@@ -4,11 +4,11 @@ namespace RPG.Models
 {
     public class HealAbility : Ability
     {
-        public HealAbility(HealAbility clone):base(clone.Name,clone.Damage, clone.ManaCost,clone.Cooldown,clone.StatusEffect)
+        public HealAbility(HealAbility clone):base(clone.Name,clone.Damage,clone.Range, clone.ManaCost,clone.Cooldown,clone.StatusEffect)
         {
         }
 
-        public HealAbility(string name, int damage, int manaCost, float cooldown, StatusEffect statusEffect) : base(name, damage, manaCost, cooldown, statusEffect)
+        public HealAbility(string name, int damage, float range, int manaCost, float cooldown, StatusEffect statusEffect) : base(name, damage,range, manaCost, cooldown, statusEffect)
         {
         }
         public override void Use(Character target)

@@ -10,10 +10,10 @@ namespace RPG.Models
 {
     public class FireBallAbility : Ability
     {
-        public FireBallAbility(string name, int damage, int manaCost, float cooldown, StatusEffect statusEffect) : base(name, damage, manaCost, cooldown, statusEffect)
+        public FireBallAbility(string name, int damage, float range, int manaCost, float cooldown, StatusEffect statusEffect) : base(name, damage,range, manaCost, cooldown, statusEffect)
         {
         }
-        public FireBallAbility(FireBallAbility clone) : base(clone.Name, clone.Damage, clone.ManaCost, clone.Cooldown, clone.StatusEffect)
+        public FireBallAbility(FireBallAbility clone) : base(clone.Name, clone.Damage,clone.Range,clone.ManaCost, clone.Cooldown, clone.StatusEffect)
         {
         }
         public override void Use(Character target)

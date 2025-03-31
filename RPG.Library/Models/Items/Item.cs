@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using RPG.Library.Interfaces;
 
 namespace RPG.Models
 {
-    public class Item
+    public class Item : IUseAble
     {
         public string Name { get; set; }
         public float Weight { get; set; }

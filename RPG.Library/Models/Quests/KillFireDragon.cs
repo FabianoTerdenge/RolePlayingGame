@@ -17,20 +17,27 @@ namespace RPG.Models.Quests
 
         public override void isCompleted()
         {
-            foreach (FightRecord fr in FightLog.records)
+            foreach (FightRecord fr in FightLog.Instance.GetLogs())
             {
                 List<Character> dragon = fr.AllCharacters.FindAll(m => m.Name.Equals("Feuer-Drache"));
                 if (dragon.Any())
                 {
-                    if (dragon.FindAll((d) => d.CurrentHealth <= 0).Count() > 0)
+                    if (dragon.FindAll((d) => !d.IsAlive()).Count() > 0)
                     {
                         IsCompleted = true;
+                        FightLog.Instance.Detach(this);
                         Console.WriteLine($"Quest '{Title}' abgeschlossen!");
-                        //player get some kind of reward
+                        //TODO player get some kind of reward
+                        //attach quest to single player rather than globally
                         break;
                     }
                 }
             }
+        }
+
+        public override void Update()
+        {
+            isCompleted();
         }
     }
 }

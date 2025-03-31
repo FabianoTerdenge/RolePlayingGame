@@ -5,11 +5,11 @@ using static System.Net.Mime.MediaTypeNames;
 
 public class PoisonAbility : Ability
 {
-    public PoisonAbility(PoisonAbility clone) : base(clone.Name, clone.Damage, clone.ManaCost, clone.Cooldown, clone.StatusEffect)
+    public PoisonAbility(PoisonAbility clone) : base(clone.Name, clone.Damage,clone.Range, clone.ManaCost, clone.Cooldown, clone.StatusEffect)
     {
     }
 
-    public PoisonAbility(string name, int damage, int manaCost, float cooldown, StatusEffect statusEffect) : base(name, damage, manaCost, cooldown, statusEffect)
+    public PoisonAbility(string name, int damage, float range, int manaCost, float cooldown, StatusEffect statusEffect) : base(name, damage, range, manaCost, cooldown, statusEffect)
     {
     }
 

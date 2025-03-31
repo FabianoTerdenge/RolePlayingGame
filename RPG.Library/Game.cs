@@ -1,5 +1,9 @@
-﻿using RPG.Library.Models;
+﻿using RPG.Library.Interfaces;
+using RPG.Library;
+using RPG.Library.Models;
+using RPG.Library.Models.Characters;
 using RPG.Models;
+using RPG.Models.Quests;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,6 +12,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using RPG.Library.Models.Abilities;
 
 namespace RPG
 {
@@ -16,18 +21,57 @@ namespace RPG
         public List<Player> Players { get; set; }
         public List<Quest> Quests { get; set; }
         public List<Monster> Monsters { get; set; }
-        private static readonly float _deltaTime = 0.1f;
+        public TradingSystem tradingTest { get; set; }
 
         public Game()
         {
             Players = new List<Player>();
             Quests = new List<Quest>();
             Monsters = new List<Monster>();
+            tradingTest= new TradingSystem();
         }
 
         public void StartGame()
         {
             Console.WriteLine("Das Spiel beginnt!");
+
+            // Monster erstellen
+            Monster dragon = new("Feuer-Drache", 50, 1.51f, 3.5f, 1, 10, 8, 5, true, 10, 100, 100, new List<Ability> { Ability.fireball }, new Vector3(1, 1, 0), Weapon.Claws); // (x,y) 2D opsition,z=Character Height
+            Monsters.Add(dragon);
+
+            // Spielercharakter erstellen
+            Player player1 = new("Sir Lancelot", 100, 2f, 1.5f, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { Ability.fireball, Ability.heal, Ability.poisonDart, Ability.stunAttack }, new Vector3(0, 0, 0), Weapon.Longsword);
+            Player player2 = new("Lady Gwinevier", 100, 2f, 1.5f, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { Ability.fireball, Ability.heal, Ability.blessing, Ability.poisonDart, Ability.stunAttack }, new Vector3(1, 0, 0), Weapon.Longsword);
+            Players.Add(player1);
+            //Players.Add(player2);
+
+            //Quest erstellen
+            Quest quest = new KillFireDragon("Feuer-Drachen besiegen", "Besiege den Feuer-Drachen im Wald.", new List<Monster> { dragon }, 100);
+            AddQuest(quest);
+
+            //Gegenstände
+            Potion potion = new Potion("Heiltrank", 0.5f, 20, 25);
+            Potion manaPotion = new Potion("Manatrank", 0.5f, 20, 25);
+            Console.WriteLine($"{player1.Name} Inventory:");
+            ((ITrader)player1).AddItem(potion);
+            ((ITrader)player1).ShowInventory();
+
+            ITrader merchant = new Merchant("Brandur Tukk", 100, 0.3f, 0.5f, 1, 1, 2, 10, 100, 1, 0, new List<Ability>(), new Vector3(-1, -1, -1), Weapon.Fists);
+            merchant.RestockInventory(new List<Item>() { potion, potion, potion, manaPotion });
+            merchant.ShowInventory();
+
+            ITrader blacksmith = new Merchant("Blacksmith Hekler & Koch", 100, 0.3f, 0.5f, 1, 1, 2, 10, 100, 1, 0, new List<Ability>(), new Vector3(-1, -1, -1), Weapon.Fists);
+            blacksmith.AddItem(new Item("Iron Sword", 12f, 30));
+            blacksmith.AddItem(new Item("Steel Shield", 20f, 25));
+
+            // Spieleraktionen
+            var combined = new List<Character>(Players);
+            combined.AddRange(Monsters);
+
+            CombatManager combatManager = new CombatManager(combined);
+            combatManager.FightMonster();
+            // Spiel beenden
+            EndGame();
         }
 
         public void EndGame()
@@ -38,386 +82,11 @@ namespace RPG
         public void AddQuest(Quest quest)
         {
             Quests.Add(quest);
+            FightLog.Instance.Attach(quest);
             Console.WriteLine($"Quest '{quest.Title}' wurde hinzugefügt.");
         }
-        //one player fight n monsters with a round stil combat system
-        public void FightMonster(Player player, List<Monster> monsters)
-        {
-            AnouncmentBeforeFight(new List<Player> { player }, monsters);
-
-            FightLog.records.Add(new FightRecord(true, new List<Player> { player }, new List<Monster>(monsters), player, true));
-            while (player.CurrentHealth > 0 && monsters.Find((m) => m.IsAlive()) != null)
-            {
-                // Spieleraktionen
-                Console.WriteLine($"\n{player.Name}: Was möchtest du tun?");
-                Console.WriteLine("1. Angreifen");
-                Console.WriteLine("2. Spezialfähigkeit verwenden\n");
-                string attackChoice = Console.ReadLine();
-
-                if (attackChoice == "1") // Normal Attack
-                {
-                    // Zielmonster auswählen
-                    int monsterChoice = 0;
-                    if (monsters.Count > 1)
-                    {
-                        Console.WriteLine("Wähle ein Monster zum Angreifen:");
-                        for (int i = 0; i < monsters.Count; i++)
-                        {
-                            Console.WriteLine($"{i + 1}. {monsters[i].Name} (HP: {monsters[i].CurrentHealth})");
-                        }
-                        monsterChoice = int.Parse(Console.ReadLine()) - 1;
-                    }
-
-                    if (monsterChoice >= 0 && monsterChoice < monsters.Count)
-                    {
-                        Console.WriteLine($"{player.Name} greift {monsters[monsterChoice].Name} an");
-                        monsters[monsterChoice].CurrentHealth -= player.Strength;
-                        Console.WriteLine($"{monsters[monsterChoice].Name} hat noch {monsters[monsterChoice].CurrentHealth} Lebenspunkte.");
-
-                        if (!monsters[monsterChoice].IsAlive())
-                        {
-                            Console.WriteLine($"{monsters[monsterChoice].Name} wurde besiegt!");
-                            player.GainExperience(monsters[monsterChoice].ExperienceReward);
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Ungültige Auswahl!");
-                    }
-                    FightLog.records.Add(new FightRecord(true, new List<Player> { player }, new List<Monster>(monsters), player));
-                }
-                else if (attackChoice == "2") // Ability Cast
-                {
-                    if (player.Abilities.Count > 0)
-                    {
-                        Console.WriteLine("\nWähle eine Fähigkeit:");
-                        for (int i = 0; i < player.Abilities.Count; i++)
-                        {
-                            Console.WriteLine($"{i + 1}. {player.Abilities[i].Name} (Schaden: {player.Abilities[i].Damage}, Mana: {player.Abilities[i].ManaCost})");
-                        }
-                        int abilityChoice = int.Parse(Console.ReadLine()) - 1;
-
-                        if (abilityChoice >= 0 && abilityChoice < player.Abilities.Count)
-                        {
-                            Ability selectedAbility = player.Abilities[abilityChoice];
-
-                            // Bereichsangriff oder Einzelziel?
-                            if (selectedAbility.Name != "Heilung") // Beispiel für einen Bereichsangriff
-                            {
-                                /* //attack all monsters
-                                 * Console.WriteLine($"{selectedAbility.Name} Angriff auf alle Monster!");
-                                foreach (var monster in monsters)
-                                {
-                                    player.UseAbility(ability, monster);
-                                    if (!monster.IsAlive())
-                                    {
-                                        Console.WriteLine($"{monster.Name} wurde besiegt!");
-                                        player.GainExperience(monster.ExperienceReward);
-                                    }
-                                }*/
-                                // Zeige verfügbare Monster an
-                                int SelectedMonsterChoice = 1;
-                                bool validInput = true;
-                                if (monsters.Count > 1)
-                                {
-                                    Console.WriteLine("Wähle ein Monster zum Angreifen aus:");
-                                    for (int i = 0; i < monsters.Count; i++)
-                                    {
-                                        Console.WriteLine($"{i + 1}. {monsters[i].Name} (HP: {monsters[i].CurrentHealth})");
-                                    }
-
-                                    // Spieler-Eingabe verarbeiten
-                                    validInput = int.TryParse(Console.ReadLine(), out SelectedMonsterChoice);
-                                }
-
-                                if (validInput && SelectedMonsterChoice > 0 && SelectedMonsterChoice <= monsters.Count)
-                                {
-                                    Monster target = monsters[SelectedMonsterChoice - 1];
-                                    player.UseAbility(selectedAbility, target);
-
-                                    if (!target.IsAlive())
-                                    {
-                                        Console.WriteLine($"{target.Name} wurde besiegt!");
-                                    }
-                                }
-                                else
-                                {
-                                    Console.WriteLine("Ungültige Eingabe!");
-                                }
-
-                            }
-                            else // Heal
-                            {
-                                player.UseAbility(selectedAbility, player);
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("Ungültige Auswahl!");
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Du hast keine Fähigkeiten!");
-                    }
-                    FightLog.records.Add(new FightRecord(true, new List<Player> { player }, new List<Monster>(monsters), player));
-                }
-
-                // Monsteraktionen
-                foreach (var monster in monsters.ToList()) // ToList() vermeidet Änderungen während der Iteration
-                {
-                    if (monster.Abilities.Count > 0 && new Random().Next(0, 2) == 1) // 50% Chance, eine Fähigkeit zu verwenden
-                    {
-                        Ability monsterAbility = monster.Abilities[new Random().Next(0, monster.Abilities.Count)];
-                        monster.UseAbility(monsterAbility, player);
-                    }
-                    else
-                    {
-                        ((Character)monster).AutoAttackEnemy(player);
-                    }
-
-                    if (!player.IsAlive())
-                    {
-                        Console.WriteLine($"\n{player.Name} wurde besiegt!\n");
-                        return; // Kampf beenden
-                    }
-                    FightLog.records.Add(new FightRecord(false, new List<Player> { player }, new List<Monster>(monsters), player));
-                }
-                EndOfRound();
-
-            }
-            //check for Quest Completion
-            Quests.ForEach(q => q.isCompleted());
-            if (monsters.Find((m) => m.CurrentHealth > 0) == null)
-            {
-                Console.WriteLine("Alle Monster wurden besiegt!");
-            }
-        }
-        public void FightMonster(List<Player> players, List<Monster> monsters)
-        {
-            AnouncmentBeforeFight(players, monsters);
-            Player[] alivePlayer = players.ToArray();
-            Monster[] aliveMonsters = monsters.ToArray();
-
-            while (alivePlayer.Length > 0 && aliveMonsters.Length > 0)
-            {
-                //alle Player greifen an
-                foreach (var attackingPlayer in alivePlayer)
-                {
-                    aliveMonsters = monsters.Where((p) => p.IsAlive()).ToArray();
-
-                    if (!aliveMonsters.Any())
-                        continue;
-                    FightLog.records.Add(new FightRecord(true, new List<Player>(players), new List<Monster>(monsters), attackingPlayer, true));
-
-                    // Spieleraktionen
-                    Console.WriteLine($"\n{attackingPlayer.Name}: Was möchtest du tun?");
-                    Console.WriteLine("1. Angreifen");
-                    Console.WriteLine("2. Spezialfähigkeit verwenden\n");
-                    string attackChoice = Console.ReadLine();
-
-                    if (attackChoice == "1") // Normal Attack
-                    {
-                        // Zielmonster auswählen
-                        int monsterChoice = 0;
-                        if (aliveMonsters.Length > 1)
-                        {
-                            Console.WriteLine("Wähle ein Monster zum Angreifen:");
-                            for (int i = 0; i < aliveMonsters.Length; i++)
-                            {
-                                Console.WriteLine($"{i + 1}. {aliveMonsters[i].Name} (HP: {aliveMonsters[i].CurrentHealth})");
-                            }
-                            monsterChoice = int.Parse(Console.ReadLine()) - 1;
-                        }
-
-                        if (monsterChoice >= 0 && monsterChoice < aliveMonsters.Length)
-                        {
-                            Console.WriteLine($"{attackingPlayer.Name} greift {monsters[monsterChoice].Name} an");
-                            aliveMonsters[monsterChoice].CurrentHealth -= attackingPlayer.Strength;
-                            Console.WriteLine($"{aliveMonsters[monsterChoice].Name} hat noch {aliveMonsters[monsterChoice].CurrentHealth} Lebenspunkte.");
-
-                            if (!aliveMonsters[monsterChoice].IsAlive())
-                            {
-                                Console.WriteLine($"{aliveMonsters[monsterChoice].Name} wurde besiegt!");
-                                attackingPlayer.GainExperience(aliveMonsters[monsterChoice].ExperienceReward);
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("Ungültige Auswahl!");
-                        }
-                        FightLog.records.Add(new FightRecord(true, new List<Player>(players), new List<Monster>(monsters), attackingPlayer));
-                    }
-                    else if (attackChoice == "2") // Ability Cast
-                    {
-                        if (attackingPlayer.Abilities.Count > 0)
-                        {
-                            Console.WriteLine("\nWähle eine Fähigkeit:");
-                            for (int i = 0; i < attackingPlayer.Abilities.Count; i++)
-                            {
-                                Console.WriteLine($"{i + 1}. {attackingPlayer.Abilities[i].Name} (Schaden: {attackingPlayer.Abilities[i].Damage}, Mana: {attackingPlayer.Abilities[i].ManaCost})");
-                            }
-                            int abilityChoice = int.Parse(Console.ReadLine()) - 1;
-
-                            if (abilityChoice >= 0 && abilityChoice < attackingPlayer.Abilities.Count)
-                            {
-                                Ability selectedAbility = attackingPlayer.Abilities[abilityChoice];
-
-                                // Bereichsangriff oder Einzelziel?
-                                if (selectedAbility.Name != "Heilung") // Beispiel für einen Bereichsangriff
-                                {
-                                    // Zeige verfügbare Monster an
-                                    int SelectedMonsterChoice = 1;
-                                    bool validInput = true;
-                                    if (aliveMonsters.Length > 1)
-                                    {
-                                        Console.WriteLine("Wähle ein Monster zum Angreifen aus:");
-                                        for (int i = 0; i < aliveMonsters.Length; i++)
-                                        {
-                                            Console.WriteLine($"{i + 1}. {aliveMonsters[i].Name} (HP: {aliveMonsters[i].CurrentHealth})");
-                                        }
-
-                                        // Spieler-Eingabe verarbeiten
-                                        validInput = int.TryParse(Console.ReadLine(), out SelectedMonsterChoice);
-                                    }
-
-                                    if (validInput && SelectedMonsterChoice > 0 && SelectedMonsterChoice <= aliveMonsters.Length)
-                                    {
-                                        Monster target = aliveMonsters[SelectedMonsterChoice - 1];
-                                        attackingPlayer.UseAbility(selectedAbility, target);
-
-                                        if (!target.IsAlive())
-                                        {
-                                            Console.WriteLine($"{target.Name} wurde besiegt!");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine("Ungültige Eingabe!");
-                                    }
-
-                                }
-                                else // Heal
-                                {
-                                    attackingPlayer.UseAbility(selectedAbility, attackingPlayer);
-                                }
-                            }
-                            else
-                            {
-                                Console.WriteLine("Ungültige Auswahl!");
-                            }
-                        }
-                        else
-                        {
-                            Console.WriteLine("Du hast keine Fähigkeiten!");
-                        }
-                        FightLog.records.Add(new FightRecord(true, new List<Player>(players), new List<Monster>(monsters), attackingPlayer));
-                    }
-                }
-                aliveMonsters = monsters.Where((p) => p.CurrentHealth > 0).ToArray();
-
-                // Monsteraktionen
-                foreach (var monster in aliveMonsters)
-                {
-                    Player playerTarget = alivePlayer[new Random().Next(0, alivePlayer.Length)];
-                    if (!alivePlayer.Any())
-                        continue;
-                    //Ability Attack
-                    if (monster.Abilities.Count > 0 && new Random().Next(0, 2) == 1) // 50% Chance, eine Fähigkeit zu verwenden
-                    {
-                        Ability monsterAbility = monster.Abilities[new Random().Next(0, monster.Abilities.Count)];
-                        //attackChoice
-                        monster.UseAbility(monsterAbility, playerTarget);
-                    }
-                    else //normal Attack
-                    {
-                        ((Character)monster).AutoAttackEnemy(playerTarget);
-                    }
-
-                    if (!playerTarget.IsAlive())
-                    {
-                        Console.WriteLine($"\n{playerTarget.Name} wurde besiegt!\n");
-                        return; // Kampf beenden
-                    }
-                    FightLog.records.Add(new FightRecord(false, new List<Player>(players), new List<Monster>(monsters), playerTarget));
-                    alivePlayer = players.Where((p) => p.CurrentHealth > 0).ToArray();
-
-                }
-
-                EndOfRound();
-
-            }
-            //check for Quest Completion
-            Quests.ForEach(q => q.isCompleted());
-            if (monsters.Find((m) => m.CurrentHealth > 0) == null)
-            {
-                Console.WriteLine("Alle Monster wurden besiegt!");
-            }
-        }
-        //characters attack is related to their attackspeed
-        public void FightMonster(List<Character> characters)
-        {
-            AnouncmentBeforeFight(characters);
-            Player[] alivePlayer = characters.OfType<Player>().ToArray();
-            Monster[] aliveMonsters = characters.OfType<Monster>().ToArray();
-            while (!Character.EndOfFight(characters))
-            {
-                characters.ForEach((c) => c.UpdateAttackTiming(_deltaTime, characters));
-                EndOfRound();
-
-                //check for Quest Completion
-                Quests.ForEach(q => q.isCompleted());
-                if (!aliveMonsters.ToList().FindAll((m) => m.IsAlive()).Any())
-                {
-                    Console.WriteLine("Alle Monster wurden besiegt!");
-                }
-            }
-
-        }
-
-        private void AnouncmentBeforeFight(List<Player> players, List<Monster> monsters)
-        {
-            Console.WriteLine($" \nEin Kampf beginnt zwischen ");
-            Console.WriteLine("| {0,-20} | {1,-20} |", "Helden", "Monster");
-            Console.WriteLine("| -------------------- | -------------------- |");
-
-            int rowCount = 0;
-            while (Math.Max(players.Count, monsters.Count) > rowCount)
-            {
-                Console.WriteLine("| {0,-20} | {1,-20} |", players.Count > rowCount ? players[rowCount].Name : "", monsters.Count > rowCount ? monsters[rowCount].Name : "");
-
-                rowCount++;
-            }
-
-        }
-        private void AnouncmentBeforeFight(List<Character> characters)
-        {
-            Console.WriteLine($" \nEin Kampf beginnt zwischen ");
-            Console.WriteLine("| {0,-20} | {1,-20} |", "Helden", "Monster");
-            Console.WriteLine("| -------------------- | -------------------- |");
-            List<Player> players = characters.OfType<Player>().ToList();
-            List<Monster> monsters = characters.OfType<Monster>().ToList();
-            int rowCount = 0;
-            while (Math.Max(players.Count, monsters.Count) > rowCount)
-            {
-                Console.WriteLine("| {0,-20} | {1,-20} |", players.Count > rowCount ? players[rowCount].Name : "", monsters.Count > rowCount ? monsters[rowCount].Name : "");
-
-                rowCount++;
-            }
-
-        }
-        private void EndOfRound()
-        {
-            Players.ForEach(p =>
-            {
-                p.ProcessAbilityCooldowns(_deltaTime);
-                p.ProcessStatusEffects(_deltaTime);
-            });
-            Monsters.ForEach(m =>
-            {
-                m.ProcessAbilityCooldowns(_deltaTime);
-                m.ProcessStatusEffects(_deltaTime);
-            });
-        }
+        
     }
 }
+
+//TODO Exp for all Players or only for the player that slayed a monster ?
