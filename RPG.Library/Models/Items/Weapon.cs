@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RPG.Library.Models.Characters;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,7 +33,7 @@ namespace RPG.Models
         public static readonly Weapon Claws = new Weapon(
           "Claws",
             WeaponType.Melee,
-            StatusEffect.bleedEffect,
+            StatusEffectFactory.CreateBleedEffect(),
             15,
             .5f,
             0.1f,

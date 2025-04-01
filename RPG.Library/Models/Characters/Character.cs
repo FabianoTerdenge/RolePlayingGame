@@ -30,6 +30,7 @@ namespace RPG.Models
         public int Strength { get; set; }
         public int Dexterity { get; set; }
         public int Intelligence { get; set; }
+        public int Charisma { get; set; }
         public int ExperiencePoints { get; set; }
         public int Gold { get; set; }
         public int Mana { get; set; }
@@ -42,8 +43,9 @@ namespace RPG.Models
         public float DodgeChance { get; set; }
         public bool IsBlocking { get; set; } = false;
         public int BlockStrength { get; set; } = 2;
+        public int Reputation { get; set; } = 0;
 
-        public Character(string name, int health, float attackSpeed, float movementSpeed,int armor, int magicResist,float dodgeChance, int level, int strength, int dexterity, int intelligence, int gold, int experience, int mana, List<Ability> abilities, Vector3 position, Weapon equippedweapon)
+        public Character(string name, int health, float attackSpeed, float movementSpeed,int armor, int magicResist,float dodgeChance, int level, int strength, int dexterity, int intelligence,int charisma, int gold, int experience, int mana, List<Ability> abilities, Vector3 position, Weapon equippedweapon)
         {
             Id = _id++;
             Name = name;
@@ -55,6 +57,7 @@ namespace RPG.Models
             Strength = strength;
             Dexterity = dexterity;
             Intelligence = intelligence;
+            Charisma = charisma;
             ExperiencePoints = experience;
             Gold = gold;
             Mana = mana;

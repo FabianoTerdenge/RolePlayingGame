@@ -14,13 +14,6 @@ namespace RPG.Models
         public float Cooldown { get; set; } //in s
         public float RemainingCooldown { get; set; }  //in s
         public StatusEffect StatusEffect { get; set; }
-        //Abilities
-        public static readonly FireBallAbility fireball = new("Feuerball", 20, 10f, 30, 3f, null);
-        public static readonly HealAbility heal = new("Heilung", -15, 3f, 20, 5f, null);
-        public static readonly PoisonAbility poisonDart = new("Giftpfeil", 10, 5f, 20, 2f, StatusEffect.poisonEffect);
-        public static readonly StunAbility stunAttack = new("Betäubungsschlag", 5, 1.5f, 0, 1f, StatusEffect.stunEffect);
-        public static readonly BlessingAbility blessing = new("Läuterung", 5, 1.5f, 0, 1f, null);
-
         public Ability(string name, int damage, float range, int manaCost, float cooldown, StatusEffect statusEffect)
         {
             Name = name;
