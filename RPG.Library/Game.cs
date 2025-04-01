@@ -36,12 +36,12 @@ namespace RPG
             Console.WriteLine("Das Spiel beginnt!");
 
             // Monster erstellen
-            Monster dragon = new("Feuer-Drache", 50, 1.51f, 3.5f, 1, 10, 8, 5, true, 10, 100, 100, new List<Ability> { Ability.fireball }, new Vector3(1, 1, 0), Weapon.Claws); // (x,y) 2D opsition,z=Character Height
+            Monster dragon = new("Feuer-Drache", 50, 1.51f, 3.5f,10,10,0.15f, 1, 10, 8, 5, true, 10, 100, 100, new List<Ability> { Ability.fireball }, new Vector3(1, 1, 0), Weapon.Claws); // (x,y) 2D opsition,z=Character Height
             Monsters.Add(dragon);
 
             // Spielercharakter erstellen
-            Player player1 = new("Sir Lancelot", 100, 2f, 1.5f, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { Ability.fireball, Ability.heal, Ability.poisonDart, Ability.stunAttack }, new Vector3(0, 0, 0), Weapon.Longsword);
-            Player player2 = new("Lady Gwinevier", 100, 2f, 1.5f, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { Ability.fireball, Ability.heal, Ability.blessing, Ability.poisonDart, Ability.stunAttack }, new Vector3(1, 0, 0), Weapon.Longsword);
+            Player player1 = new("Sir Lancelot", 100, 2f, 1.5f, 5, 5, 0.1f, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { Ability.fireball, Ability.heal, Ability.poisonDart, Ability.stunAttack }, new Vector3(0, 0, 0), Weapon.Longsword);
+            Player player2 = new("Lady Gwinevier", 100, 2f, 1.5f, 5, 5, 0.1f, 1, 10, 8, 5, 10, 1, 100, new List<Ability> { Ability.fireball, Ability.heal, Ability.blessing, Ability.poisonDart, Ability.stunAttack }, new Vector3(1, 0, 0), Weapon.Longsword);
             Players.Add(player1);
             //Players.Add(player2);
 
@@ -56,11 +56,11 @@ namespace RPG
             ((ITrader)player1).AddItem(potion);
             ((ITrader)player1).ShowInventory();
 
-            ITrader merchant = new Merchant("Brandur Tukk", 100, 0.3f, 0.5f, 1, 1, 2, 10, 100, 1, 0, new List<Ability>(), new Vector3(-1, -1, -1), Weapon.Fists);
+            ITrader merchant = new Merchant("Brandur Tukk", 100, 0.3f, 0.5f, 1, 0, 0.01f, 1, 1, 2, 10, 100, 1, 0, new List<Ability>(), new Vector3(-1, -1, -1), Weapon.Fists);
             merchant.RestockInventory(new List<Item>() { potion, potion, potion, manaPotion });
             merchant.ShowInventory();
 
-            ITrader blacksmith = new Merchant("Blacksmith Hekler & Koch", 100, 0.3f, 0.5f, 1, 1, 2, 10, 100, 1, 0, new List<Ability>(), new Vector3(-1, -1, -1), Weapon.Fists);
+            ITrader blacksmith = new Merchant("Blacksmith Hekler & Koch", 100, 0.3f, 0.5f, 7, 0, 0.005f, 1, 1, 2, 10, 100, 1, 0, new List<Ability>(), new Vector3(-1, -1, -1), Weapon.Fists);
             blacksmith.AddItem(new Item("Iron Sword", 12f, 30));
             blacksmith.AddItem(new Item("Steel Shield", 20f, 25));
 

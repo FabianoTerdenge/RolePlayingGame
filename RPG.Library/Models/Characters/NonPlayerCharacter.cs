@@ -23,8 +23,8 @@ namespace RPG.Models
 
         float ITrader.SellPriceMultiplier => 0.8f;
 
-        public NonPlayerCharacter(string name, int health, float attackSpeed, float movementSpeed, int level, int strength, int dexterity, int intelligence, bool isHostile, int gold, int experience, int mana, List<Ability> abilities, Vector3 position, Weapon equippedweapon)
-            : base(name, health, attackSpeed, movementSpeed, level, strength, dexterity, intelligence, gold, experience, mana, abilities, position, equippedweapon)
+        public NonPlayerCharacter(string name, int health, float attackSpeed, float movementSpeed,int armor, int magicResist,float dodgeChance, int level, int strength, int dexterity, int intelligence, bool isHostile, int gold, int experience, int mana, List<Ability> abilities, Vector3 position, Weapon equippedweapon)
+            : base(name, health, attackSpeed, movementSpeed, armor, magicResist, dodgeChance, level, strength, dexterity, intelligence, gold, experience, mana, abilities, position, equippedweapon)
         {
             IsHostile = isHostile;
         }

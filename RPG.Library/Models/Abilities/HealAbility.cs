@@ -11,7 +11,7 @@ namespace RPG.Models
         public HealAbility(string name, int damage, float range, int manaCost, float cooldown, StatusEffect statusEffect) : base(name, damage,range, manaCost, cooldown, statusEffect)
         {
         }
-        public override void Use(Character target)
+        public override void Use(Character user,Character target)
         {
             if (RemainingCooldown > 0)
             {
@@ -28,7 +28,7 @@ namespace RPG.Models
                 target.CurrentHealth -= Damage;
             }
             Console.WriteLine($"{target.Name} hat noch {target.CurrentHealth} Lebenspunkte.");
-            base.Use(target);
+            base.Use(user, target);
         }
     }
 }

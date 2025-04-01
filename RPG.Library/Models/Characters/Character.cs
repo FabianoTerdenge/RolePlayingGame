@@ -24,7 +24,7 @@ namespace RPG.Models
             set { _currentHealth = value; }
         }
         private float AttackTimer { get; set; } // current Attackdelta used for attackspeed calculation
-        public float AttackSpeed {get; set;}
+        public float AttackSpeed { get; set; }
         public float MovementSpeed { get; set; }
         public int Level { get; set; }
         public int Strength { get; set; }
@@ -37,9 +37,13 @@ namespace RPG.Models
         public List<StatusEffect> StatusEffects { get; set; }
         public Vector3 Position { get; set; }
         public Weapon EquippedWeapon { get; set; }
+        public int Armor { get; set; }
+        public int MagicResist { get; set; }
+        public float DodgeChance { get; set; }
+        public bool IsBlocking { get; set; } = false;
+        public int BlockStrength { get; set; } = 2;
 
-
-        public Character(string name, int health, float attackSpeed, float movementSpeed, int level, int strength, int dexterity, int intelligence, int gold, int experience, int mana, List<Ability> abilities, Vector3 position, Weapon equippedweapon)
+        public Character(string name, int health, float attackSpeed, float movementSpeed,int armor, int magicResist,float dodgeChance, int level, int strength, int dexterity, int intelligence, int gold, int experience, int mana, List<Ability> abilities, Vector3 position, Weapon equippedweapon)
         {
             Id = _id++;
             Name = name;
@@ -66,7 +70,6 @@ namespace RPG.Models
 
             while (AttackTimer >= interval && !EndOfFight(characters))
             {
-                //TODO add move to other attack patterns but auto attack
                 Attack(characters);
                 AttackTimer -= interval;
             }
@@ -81,16 +84,18 @@ namespace RPG.Models
             return false;
         }
 
-        public void AutoAttackEnemy(Character character)
+        public void AutoAttackEnemy(Character target)
         {
-            int dmg = CalculateDamage();
-            Console.WriteLine($"{Name} greift {character.Name} an und verursacht {dmg} Schaden!");
-            character.CurrentHealth -= dmg;
-            Console.WriteLine($"{character.Name} hat noch {character.CurrentHealth} Lebenspunkte.");
+            int dmg = CalculateDamage(target, EquippedWeapon.Damage);
+            if (dmg <= 0)
+                return;
+            Console.WriteLine($"{Name} greift {target.Name} an und verursacht {dmg} Schaden!");
+            target.CurrentHealth -= dmg;
+            Console.WriteLine($"{target.Name} hat noch {target.CurrentHealth} Lebenspunkte.");
             //apply statusEffect of Weapon
             if (EquippedWeapon.AppliesStatusEffect != null)
             {
-                character.ApplyStatusEffect(EquippedWeapon.AppliesStatusEffect);
+                target.ApplyStatusEffect(EquippedWeapon.AppliesStatusEffect);
             }
         }
         public void AttackLogicPlayer(List<Character> allCharacters)
@@ -100,7 +105,7 @@ namespace RPG.Models
             List<Monster> aliveMonsters = monsters.FindAll(m => m.IsAlive());
             List<Player> alivePlayers = players.FindAll(p => p.IsAlive());
 
-            //TODO fix show map of characters 
+            //TODO fix show map of characters wit float values and not just round them
             CombatMap combatMap = new CombatMap(allCharacters);
             combatMap.DrawMap();
 
@@ -170,7 +175,7 @@ namespace RPG.Models
                     {
                         Ability selectedAbility = Abilities[abilityChoice];
 
-                        // Bereichsangriff oder Einzelziel?
+                        //TODO Bereichsangriff oder Einzelziel?
                         if (selectedAbility.Name != "Heilung") // Beispiel für einen Bereichsangriff
                         {
                             // Zeige verfügbare Monster an
@@ -248,7 +253,7 @@ namespace RPG.Models
                 else
                     Console.WriteLine("\nBitte geben Sie eine x und eine y Koordinate ein mit einem Komma getrennt");
             }
-            //TODO check input syntax
+
             //check if in movement range
             Vector3 movement = new Vector3(float.Parse(movementCoordinates.Split(",")[0]), float.Parse(movementCoordinates.Split(",")[1]), 0);
             if (Vector3.Distance(movement, Position) < MovementSpeed)
@@ -422,13 +427,12 @@ namespace RPG.Models
             Gold += gold;
             Console.WriteLine($"{Name} verkauft {item.Name} für {gold} Gold.");
         }
-
         public void UseAbility(Ability ability, Character target)
         {
             if (Mana >= ability.ManaCost)
             {
                 Mana -= ability.ManaCost;
-                ability.Use(target);
+                ability.Use(this, target);
             }
             else
             {
@@ -439,15 +443,49 @@ namespace RPG.Models
         {
             return target.IsAlive() && this.IsInRange(target, attackRange);
         }
-        public virtual int CalculateDamage()
+        public virtual int CalculateDamage(Character target, int damage, bool isMagical = false)
         {
-            int baseDamage = EquippedWeapon.Damage;
-            return (int)(baseDamage * (CheckCriticalHit() ? 2 : 1));
+            int rawDamage = damage;
+            bool isCritical = CheckCriticalHit(isMagical ? 0.2f : EquippedWeapon.CriticalChance);
+            if (isCritical)
+            {
+                Console.WriteLine($"{target.Name} erfährt ein Kritischen Treffer der nicht auszuweichen ist!");
+                return rawDamage * 2;
+            }
+            Random random = new Random();
+            // Dodge check (avoid all damage if successful)
+            if (random.NextDouble() < DodgeChance)
+            {
+                Console.WriteLine($"{target.Name} weicht dem Angriff aus!");
+                return 0;
+            }
+
+            // Base damage reduction
+            int damageAfterReduction = isMagical
+                ? Math.Max(0, rawDamage - MagicResist)
+                : Math.Max(0, rawDamage - Armor);
+
+            //TODO Block move Blocking reduces damage further
+            /*if (IsBlocking)
+            {
+                damageAfterReduction = Math.Max(0, damageAfterReduction - BlockStrength);
+                Console.WriteLine($"{Name} blocked the attack!");
+            }*/
+
+            //TODO add shield weapon buff Apply status effects (e.g., "Shield" buff)
+            /*if (ActiveEffects.Any(e => e is ShieldBuff))
+            {
+                damageAfterReduction = (int)(damageAfterReduction * 0.5f); // 50% reduction
+                Console.WriteLine($"{Name}'s shield absorbed some damage!");
+            }*/
+
+            return damageAfterReduction;
         }
-        public virtual bool CheckCriticalHit()
+        //TODO only uses weapon crit change what for Abilitys crit?
+        public virtual bool CheckCriticalHit(float critChange)
         {
             Random _random = new Random();
-            return _random.Next(100) < EquippedWeapon.CriticalChance;
+            return _random.NextDouble() < critChange ;
         }
         public bool IsInRange(Character target, float attackRange)
         {

@@ -13,24 +13,18 @@ public class PoisonAbility : Ability
     {
     }
 
-    public override void Use(Character target)
+    public override void Use(Character attacker,Character target)
     {
-        if(RemainingCooldown > 0)
+        if (RemainingCooldown > 0)
         {
             Console.WriteLine($"{Name} konnte nicht angewendet werden, da es noch {RemainingCooldown} auf Cooldown ist.");
             return;
         }
-        Console.WriteLine($"{Name} wurde auf {target.Name} angewendet und er verliert {Damage} Leben");
+        int dmg = attacker.CalculateDamage(target, Damage, true);
 
-        if (target.CurrentHealth - Damage > target.CurrentHealth)
-        {
-            target.CurrentHealth = target.MaxHealth;
-        }
-        else
-        {
-            target.CurrentHealth -= Damage;
-        }
+        Console.WriteLine($"{Name} wurde auf {target.Name} angewendet und er verliert {dmg} Leben");
+        target.CurrentHealth = Math.Min(0, target.CurrentHealth - dmg);
         Console.WriteLine($"{target.Name} hat noch {target.CurrentHealth} Lebenspunkte.");
-        base.Use(target);
+        base.Use(attacker, target);
     }
 }

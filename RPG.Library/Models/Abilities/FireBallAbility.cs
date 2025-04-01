@@ -16,19 +16,18 @@ namespace RPG.Models
         public FireBallAbility(FireBallAbility clone) : base(clone.Name, clone.Damage,clone.Range,clone.ManaCost, clone.Cooldown, clone.StatusEffect)
         {
         }
-        public override void Use(Character target)
+        public override void Use(Character attacker,Character target)
         {
             if (RemainingCooldown > 0)
             {
                 Console.WriteLine($"{Name} konnte nicht angewendet werden, da es noch {RemainingCooldown} auf Cooldown ist.");
                 return;
             }
-
-            target.CurrentHealth -= Damage;
-
-            Console.WriteLine($"{Name} wurde auf {target.Name} angewendet und verursacht {Damage} Schaden!");
+            int dmg = attacker.CalculateDamage(target, Damage, true);
+            target.CurrentHealth = Math.Max(0, Math.Min(target.CurrentHealth - dmg, target.MaxHealth));
+            Console.WriteLine($"{Name} wurde auf {target.Name} angewendet und verursacht {dmg} Schaden!");
             Console.WriteLine($"{target.Name} hat noch {target.CurrentHealth} Lebenspunkte.");
-            base.Use(target);
+            base.Use(attacker, target);
         }
     }
 }

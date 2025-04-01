@@ -11,17 +11,15 @@ namespace RPG.Models
     {
         public int ExperienceReward { get; set; }
 
-        public Monster(string name, int health, float attackSpeed, float movementSpeed, int level, int strength, int dexterity, int intelligence, bool isHostile, int gold, int experience, int mana, List<Ability> abilities, Vector3 position, Weapon equippedweapon)
-            : base(name, health, attackSpeed, movementSpeed, level, strength, dexterity, intelligence, isHostile,  gold,  experience,  mana,  abilities, position, equippedweapon)
+        public Monster(string name, int health, float attackSpeed, float movementSpeed, int armor, int magicResist, float dodgeChance, int level, int strength, int dexterity, int intelligence, bool isHostile, int gold, int experience, int mana, List<Ability> abilities, Vector3 position, Weapon equippedweapon)
+            : base(name, health, attackSpeed, movementSpeed, armor, magicResist, dodgeChance, level, strength, dexterity, intelligence, isHostile,  gold,  experience,  mana,  abilities, position, equippedweapon)
         {
             ExperienceReward = experience / 10;
         }
 
-       
-
         public void UseAbility(Ability ability, Character target)
         {
-            ability.Use(target);
+            ability.Use(this,target);
         }
 
     }

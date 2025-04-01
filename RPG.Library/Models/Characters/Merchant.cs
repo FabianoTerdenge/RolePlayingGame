@@ -11,7 +11,7 @@ namespace RPG.Library.Models.Characters
 {
     public class Merchant : Character, ITrader
     {
-        public Merchant(string name, int health,  float movementSpeed, float attackSpeed, int level, int strength, int dexterity, int intelligence, int gold, int experience, int mana, List<Ability> abilities, Vector3 position, Weapon equippedweapon) : base(name, health, movementSpeed, attackSpeed, level, strength, dexterity, intelligence, gold, experience, mana, abilities, position, equippedweapon)
+        public Merchant(string name, int health, float movementSpeed, float attackSpeed, int armor, int magicResist, float dodgeChance, int level, int strength, int dexterity, int intelligence, int gold, int experience, int mana, List<Ability> abilities, Vector3 position, Weapon equippedweapon) : base(name, health, movementSpeed, attackSpeed, armor, magicResist, dodgeChance, level, strength, dexterity, intelligence, gold, experience, mana, abilities, position, equippedweapon)
         {
         }
 

@@ -16,8 +16,8 @@ namespace RPG.Models
         public float BuyPriceMultiplier { get; }
 
         public float SellPriceMultiplier { get; }
-        public Player(string name, int health, float attackSpeed, float movementSpeed, int level, int strength, int dexterity, int intelligence, int gold, int experience, int mana, List<Ability> abilities, Vector3 position, Weapon equippedweapon)
-            : base(name, health, attackSpeed,movementSpeed, level, strength, dexterity, intelligence, gold, experience, mana, abilities, position, equippedweapon)
+        public Player(string name, int health, float attackSpeed, float movementSpeed, int armor, int magicResist, float dodgeChance, int level, int strength, int dexterity, int intelligence, int gold, int experience, int mana, List<Ability> abilities, Vector3 position, Weapon equippedweapon)
+            : base(name, health, attackSpeed, movementSpeed, armor, magicResist, dodgeChance, level, strength, dexterity, intelligence, gold, experience, mana, abilities, position, equippedweapon)
         {
             Inventory = new List<Item>(); 
             BuyPriceMultiplier = 1.2f; 

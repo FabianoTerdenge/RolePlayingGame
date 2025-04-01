@@ -32,7 +32,7 @@ namespace RPG.Models
             StatusEffect = statusEffect;
         }
 
-        public virtual void Use(Character target)
+        public virtual void Use(Character attacker,Character target)
         {
             if (StatusEffect != null)
             {

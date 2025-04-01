@@ -19,7 +19,7 @@ namespace RPG.Library.Models.Abilities
         public BlessingAbility(string name, int damage, float range, int manaCost, float cooldown, StatusEffect statusEffect) : base(name, damage, range, manaCost, cooldown, statusEffect)
         {
         }
-        public override void Use(Character target)
+        public override void Use(Character attacker,Character target)
         {
             if (RemainingCooldown > 0)
             {
@@ -29,7 +29,7 @@ namespace RPG.Library.Models.Abilities
             Console.WriteLine($"{Name} wurde auf {target.Name} angewendet und läutert alle Statuseffekte!");
             target.StatusEffects.Clear();
             Console.WriteLine($"{target.Name} hat noch {target.CurrentHealth} Lebenspunkte.");
-            base.Use(target);
+            base.Use(attacker,target);
         }
     }
 }
